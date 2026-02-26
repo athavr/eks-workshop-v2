@@ -45,34 +45,22 @@ No resources found in ui namespace.
 
 As mentioned, the Pod was not recreated. Try to force a rollout of the `ui` Deployment:
 
-```bash expectError=true
+```bash hook=labels-blocked
 $ kubectl -n ui rollout restart deployment/ui
-error: failed to patch: admission webhook "validate.kyverno.svc-fail" denied the request:
-
-resource Deployment/ui/ui was blocked due to the following policies
-
-require-labels:
-  autogen-check-team: 'validation error: Label ''CostCenter'' is required to deploy
-    the Pod. rule autogen-check-team failed at path /spec/template/metadata/labels/CostCenter/'
+deployment.apps/ui restarted
 ```
 
-The rollout failed with the admission webhook denying the request due to the `require-labels` Kyverno Policy.
+The rollout command itself succeeds because Kyverno's admission webhook validates the Deployment patch, not the restart annotation. However, when the Deployment controller attempts to create the new Pod, Kyverno blocks it at the Pod level since it lacks the required `CostCenter` label. The new Pod will never come up.
 
-You can also check this `error` message by describing the `ui` Deployment or viewing the `events` in the `ui` Namespace:
+You can confirm this by checking the `events` in the `ui` Namespace:
 
 ```bash
-$ kubectl -n ui describe deployment ui
-...
-Events:
-  Type     Reason             Age                From                   Message
-  ----     ------             ----               ----                   -------
-  Warning  PolicyViolation    12m (x2 over 9m)   kyverno-scan           policy require-labels/autogen-check-team fail: validation error: Label 'CostCenter' is required to deploy the Pod. rule autogen-check-team failed at path /spec/template/metadata/labels/CostCenter/
-
 $ kubectl -n ui get events | grep PolicyViolation
-9m         Warning   PolicyViolation     pod/ui-67d8cf77cf-hvqcd    policy require-labels/check-team fail: validation error: Label 'CostCenter' is required to deploy the Pod. rule check-team failed at path /metadata/labels/CostCenter/
 9m         Warning   PolicyViolation     replicaset/ui-67d8cf77cf   policy require-labels/autogen-check-team fail: validation error: Label 'CostCenter' is required to deploy the Pod. rule autogen-check-team failed at path /spec/template/metadata/labels/CostCenter/
 9m         Warning   PolicyViolation     deployment/ui              policy require-labels/autogen-check-team fail: validation error: Label 'CostCenter' is required to deploy the Pod. rule autogen-check-team failed at path /spec/template/metadata/labels/CostCenter/
 ```
+
+The `PolicyViolation` events show that Kyverno blocked the Pod and ReplicaSet from being created due to the `require-labels` policy.
 
 Now add the required label `CostCenter` to the `ui` Deployment, using the Kustomization patch below:
 
@@ -89,6 +77,7 @@ configmap/ui unchanged
 service/ui unchanged
 deployment.apps/ui configured
 $ kubectl -n ui rollout status deployment/ui
+deployment "ui" successfully rolled out
 $ kubectl -n ui get pods --show-labels
 NAME                  READY   STATUS    RESTARTS   AGE   LABELS
 ui-5498685db8-k57nk   1/1     Running   0          60s   CostCenter=IT,app.kubernetes.io/component=service,app.kubernetes.io/created-by=eks-workshop,app.kubernetes.io/instance=ui,app.kubernetes.io/name=ui,pod-template-hash=5498685db8
@@ -131,6 +120,8 @@ $ kubectl -n carts get pods --show-labels
 NAME                     READY   STATUS    RESTARTS   AGE   LABELS
 carts-bb88b4789-kmk62   1/1     Running   0          25s   CostCenter=IT,app.kubernetes.io/component=service,app.kubernetes.io/created-by=eks-workshop,app.kubernetes.io/instance=carts,app.kubernetes.io/name=carts,pod-template-hash=bb88b4789
 ```
+
+Note that only the `carts` pod has the `CostCenter=IT` label. Any other pods in the namespace that were already running before the mutation policy was created (such as `carts-dynamodb`) will not have the label applied. Kyverno mutation only fires on admission. So existing pods must be restarted to go through the webhook and receive the mutation.
 
 It's also possible to mutate existing resources in your Amazon EKS Clusters with Kyverno Policies using `patchStrategicMerge` and `patchesJson6902` parameters in your Kyverno Policy.
 

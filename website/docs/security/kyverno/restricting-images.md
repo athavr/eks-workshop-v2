@@ -9,15 +9,14 @@ In this section, we'll explore how Kyverno can help you run secure container wor
 
 As demonstrated in previous labs, you can run Pods with images from any available registry. Let's start by running a sample Pod using the default registry, which points to `docker.io`:
 
-```bash
+```bash hook=registry-setup
 $ kubectl run nginx --image=nginx
-
-NAME    READY   STATUS    RESTARTS   AGE
-nginx   1/1     Running   0          47s
+pod/nginx created
 
 $ kubectl describe pod nginx | grep Image
     Image:          nginx
-    Image ID:       docker.io/library/nginx@sha256:4c0fdaa8b6341bfdeca5f18f7837462c80cff90527ee35ef185571e1c327beac
+    Image ID:       docker.io/library/nginx@sha256:0236ee02dcbce00b9bd83e0f5fbc51069e7e1161bd59d99885b3ae1734f3392e
+  Normal  Pulled     6s    kubelet            Successfully pulled image "nginx" in 459ms (459ms including waiting). Image size: 62944796 bytes.
 ```
 
 In this case, we've pulled a basic `nginx` image from the public registry. However, a malicious actor could potentially pull a vulnerable image and run it on the EKS cluster, potentially exploiting the cluster's resources.
@@ -45,7 +44,7 @@ clusterpolicy.kyverno.io/restrict-image-registries created
 
 Now, let's attempt to run another sample Pod using the default image from the public registry:
 
-```bash expectError=true
+```bash expectError=true hook=registry-blocked
 $ kubectl run nginx-public --image=nginx
 
 Error from server: admission webhook "validate.kyverno.svc-fail" denied the request:
@@ -63,7 +62,7 @@ Let's now try to run a sample Pod using the `nginx` image hosted in our trusted 
 
 ```bash
 $ kubectl run nginx-ecr --image=public.ecr.aws/nginx/nginx
-pod/nginx-public created
+pod/nginx-ecr created
 ```
 
 Success! The Pod was created successfully.

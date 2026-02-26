@@ -11,7 +11,7 @@ Privileged containers can perform almost all actions that the host can do and ar
 
 In this lab, we will run a privileged Pod on our EKS cluster. Execute the following command:
 
-```bash
+```bash hook=baseline-setup
 $ kubectl run privileged-pod --image=nginx --restart=Never --privileged
 pod/privileged-pod created
 $ kubectl delete pod privileged-pod
@@ -38,15 +38,16 @@ clusterpolicy.kyverno.io/baseline-policy created
 
 Now, try to run the privileged Pod again:
 
-```bash expectError=true
+```bash expectError=true hook=baseline-blocked
 $ kubectl run privileged-pod --image=nginx --restart=Never --privileged
 Error from server: admission webhook "validate.kyverno.svc-fail" denied the request:
 
 resource Pod/default/privileged-pod was blocked due to the following policies
 
 baseline-policy:
-  baseline: |
-    Validation rule 'baseline' failed. It violates PodSecurity "baseline:latest": ({Allowed:false ForbiddenReason:privileged ForbiddenDetail:container "privileged-pod" must not set securityContext.privileged=true})
+  baseline: 'Validation rule ''baseline'' failed. It violates PodSecurity "baseline:latest":
+    (Forbidden reason: privileged, field error list: [spec.containers[0].securityContext.privileged
+    is forbidden, forbidden values found: true])'
 ```
 
 As you can see, the creation failed because it doesn't comply with our Baseline Policy set on the cluster.

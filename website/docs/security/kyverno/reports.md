@@ -18,47 +18,42 @@ Let's examine our cluster's compliance status with the policies we've created so
 
 ```bash hook=reports
 $ kubectl get policyreports -A
-
-NAMESPACE     NAME                             PASS   FAIL   WARN   ERROR   SKIP   AGE
-assets        cpol-baseline-policy             3      0      0      0       0      19m
-assets        cpol-require-labels              0      3      0      0       0      27m
-assets        cpol-restrict-image-registries   3      0      0      0       0      25m
-carts         cpol-baseline-policy             6      0      0      0       0      19m
-carts         cpol-require-labels              0      6      0      0       0      27m
-carts         cpol-restrict-image-registries   3      3      0      0       0      25m
-catalog       cpol-baseline-policy             5      0      0      0       0      19m
-catalog       cpol-require-labels              0      5      0      0       0      27m
-catalog       cpol-restrict-image-registries   5      0      0      0       0      25m
-checkout      cpol-baseline-policy             6      0      0      0       0      19m
-checkout      cpol-require-labels              0      6      0      0       0      27m
-checkout      cpol-restrict-image-registries   6      0      0      0       0      25m
-default       cpol-baseline-policy             2      0      0      0       0      19m
-default       cpol-require-labels              2      0      0      0       0      13m
-default       cpol-restrict-image-registries   1      1      0      0       0      13m
-kube-system   cpol-baseline-policy             4      8      0      0       0      19m
-kube-system   cpol-require-labels              0      12     0      0       0      27m
-kube-system   cpol-restrict-image-registries   0      12     0      0       0      25m
-kyverno       cpol-baseline-policy             24     0      0      0       0      19m
-kyverno       cpol-require-labels              0      24     0      0       0      27m
-kyverno       cpol-restrict-image-registries   0      24     0      0       0      25m
-orders        cpol-baseline-policy             6      0      0      0       0      19m
-orders        cpol-require-labels              0      6      0      0       0      27m
-orders        cpol-restrict-image-registries   6      0      0      0       0      25m
-ui            cpol-baseline-policy             3      0      0      0       0      19m
-ui            cpol-require-labels              0      3      0      0       0      27m
-ui            cpol-restrict-image-registries   3      0      0      0       0      25m
+NAMESPACE     NAME                                   KIND          NAME                                             PASS   FAIL   WARN   ERROR   SKIP   AGE
+...
+carts         14b206ec-f98c-4f5a-98b8-08613b2bba3c   ReplicaSet    carts-757dbcfcf7                                 3      0      0      0       0      11m
+carts         16f00a47-fe76-46e7-be02-3ec4bb16231e   ReplicaSet    carts-7dfbb5d849                                 3      0      0      0       0      179m
+carts         50358693-2468-4b73-8873-c6239b90876c   Deployment    carts-dynamodb                                   1      2      0      0       0      179m
+carts         60f7683d-3de7-40c8-8291-6dce06d2900e   Pod           carts-dynamodb-995f7768c-kl4s6                   1      2      0      0       0      179m
+carts         6e48edbf-dd0d-478e-a52d-aed182785c24   Pod           carts-757dbcfcf7-sgpqv                           3      0      0      0       0      12m
+carts         b0356ab5-e6a5-4326-a931-0e8d1a9f7f94   Deployment    carts                                            3      0      0      0       1      179m
+carts         c914951d-21af-475d-a8f4-a0780a9d71c2   ReplicaSet    carts-dynamodb-995f7768c                         1      2      0      0       0      179m
+carts         c9ee5eed-ecd0-47a5-9930-b4185757db02   ReplicaSet    carts-68d496fff8                                 2      1      0      0       0      179m
+catalog       7584031d-b299-4ae6-8520-16b6b2df479f   StatefulSet   catalog-mysql                                    2      1      0      0       0      179m
+catalog       8bae7be3-6452-4f2f-9d85-cf6cc3362d24   ReplicaSet    catalog-5fdcc8c65                                2      1      0      0       0      179m
+catalog       93b327e5-9ce7-442c-831b-5816db78bb33   Pod           catalog-5fdcc8c65-qn5tx                          2      1      0      0       0      179m
+catalog       b9de1775-064e-4d1c-b393-b5f88b0200b6   Pod           catalog-mysql-0                                  2      1      0      0       0      179m
+catalog       d6c40501-8f34-4398-97a6-27ab1050ef93   Deployment    catalog                                          2      1      0      0       0      179m
+checkout      11f1bb14-11b2-4f50-9da0-fde2375f66c9   ReplicaSet    checkout-redis-69cb79ff4d                        2      1      0      0       0      179m
+checkout      3f896219-057e-40c0-bf99-c6ad4a57350b   Deployment    checkout                                         2      1      0      0       0      179m
+checkout      3fefabc9-d971-4ea6-9045-688f825ed232   Pod           checkout-5b885fb57c-cnlkx                        2      1      0      0       0      179m
+checkout      4df6b9d4-b87f-4a83-bbc3-985227280d2a   Deployment    checkout-redis                                   2      1      0      0       0      179m
+checkout      b7e33f5a-8afa-4c32-98fb-aed787944a8e   ReplicaSet    checkout-5b885fb57c                              2      1      0      0       0      179m
+checkout      da8392bf-5e4c-463e-98c3-20675b5aecd2   Pod           checkout-redis-69cb79ff4d-hdj5r                  2      1      0      0       0      179m
+default       7c37b6cb-08e6-4ad3-adb3-df5f52bfb767   Pod           nginx-ecr                                        4      0      0      0       0      27s
+default       ea02cd57-8684-43ad-8e8f-c0140beeec2b   Pod           nginx                                            3      1      0      0       0      2m29s
+...
 ```
 
-> Note: The output may vary.
+> Note: The output may vary. Reports will be generated for pods across all Namespaces.
 
-As we worked with ClusterPolicies, you can see in the above output that Reports were generated across all Namespaces, not just in the `default` Namespace where we created the resources to be validated. The reports show the status of objects using `PASS`, `FAIL`, `WARN`, `ERROR`, and `SKIP`.
+In Kyverno 1.13+, policy reports are scoped per-resource rather than per-policy. Each report is named by the resource's UID and shows the aggregated pass/fail counts across all policies that evaluated that resource. You can see that the `nginx` pod has 1 `FAIL` (the `restrict-image-registries` rule) while `nginx-ecr` has all passes.
 
 As mentioned earlier, blocked actions are recorded in the Namespace events. Let's examine those using the following command:
 
 ```bash
 $ kubectl get events | grep block
-8m         Warning   PolicyViolation   clusterpolicy/restrict-image-registries   Pod default/nginx-public: [validate-registries] fail (blocked); validation error: Unknown Image registry. rule validate-registries failed at path /spec/containers/0/image/
-3m         Warning   PolicyViolation   clusterpolicy/restrict-image-registries   Pod default/nginx-public: [validate-registries] fail (blocked); validation error: Unknown Image registry. rule validate-registries failed at path /spec/containers/0/image/
+4m29s       Warning   PolicyViolation   clusterpolicy/baseline-policy             Pod default/privileged-pod: [baseline] fail (blocked); Validation rule 'baseline' failed. It violates PodSecurity "baseline:latest": (Forbidden reason: privileged, field error list: [spec.containers[0].securityContext.privileged is forbidden, forbidden values found: true])
+82s         Warning   PolicyViolation   clusterpolicy/restrict-image-registries   Pod default/nginx-public: [validate-registries] fail (blocked); validation error: Unknown Image registry. rule validate-registries failed at path /spec/containers/0/image/
 ```
 
 > Note: The output may vary.
@@ -67,73 +62,46 @@ Now, let's take a closer look at the Policy Reports for the `default` Namespace 
 
 ```bash
 $ kubectl get policyreports
-NAME                                           PASS   FAIL   WARN   ERROR   SKIP   AGE
-default       cpol-baseline-policy             2      0      0      0       0      19m
-default       cpol-require-labels              2      0      0      0       0      13m
-default       cpol-restrict-image-registries   1      1      0      0       0      13m
+NAME                                   KIND   NAME        PASS   FAIL   WARN   ERROR   SKIP   AGE
+7c37b6cb-08e6-4ad3-adb3-df5f52bfb767   Pod    nginx-ecr   4      0      0      0       0      98s
+ea02cd57-8684-43ad-8e8f-c0140beeec2b   Pod    nginx       3      1      0      0       0      3m40s
 ```
 
-Notice that for the `restrict-image-registries` ClusterPolicy, we have one `FAIL` and one `PASS` report. This is because all the ClusterPolicies were created with `Enforce` mode, and as mentioned, blocked resources are not reported. Additionally, previously running resources that could violate policy rules were already removed.
+Notice that the `nginx` pod has 1 `FAIL` and the `nginx-ecr` pod has all passes. This is because all the ClusterPolicies were created with `Enforce` mode — blocked resources are not reported, only resources that were admitted and then evaluated by the background scanner. The `nginx` Pod, which we left running with a publicly available image, is the only remaining resource that violates the `restrict-image-registries` policy.
 
-The `nginx` Pod, which we left running with a publicly available image, is the only remaining resource that violates the `restrict-image-registries` policy, and it's shown in the report.
-
-To examine the violations for this Policy in more detail, describe the specific report. Use the `kubectl describe` command for the `cpol-restrict-image-registries` Report to see the validation results for the `restrict-image-registries` ClusterPolicy:
+To examine the violations for the `nginx` pod in more detail, describe its report. Since reports are named by UID, use `kubectl get policyreports` to find the report name for the `nginx` pod, then describe it:
 
 ```bash
-$ kubectl describe policyreport cpol-restrict-image-registries
-Name:         cpol-restrict-image-registries
+$ kubectl describe policyreport $(kubectl get policyreports -o json | jq -r '.items[] | select(.scope.name=="nginx") | .metadata.name')
+Name:         ea02cd57-8684-43ad-8e8f-c0140beeec2b
 Namespace:    default
 Labels:       app.kubernetes.io/managed-by=kyverno
-              cpol.kyverno.io/restrict-image-registries=607025
 Annotations:  <none>
 API Version:  wgpolicyk8s.io/v1alpha2
 Kind:         PolicyReport
-Metadata:
-  Creation Timestamp:  2024-01-18T01:03:40Z
-  Generation:          1
-  Resource Version:    607320
-  UID:                 7abb6c11-9610-4493-ab1e-df94360ce773
+Scope:
+  API Version:  v1
+  Kind:         Pod
+  Name:         nginx
+  Namespace:    default
 Results:
   Message:  validation error: Unknown Image registry. rule validate-registries failed at path /spec/containers/0/image/
   Policy:   restrict-image-registries
-  Resources:
-    API Version:  v1
-    Kind:         Pod
-    Name:         nginx
-    Namespace:    default
-    UID:          dd5e65a9-66b5-4192-89aa-a291d150807d
-  Result:         fail
-  Rule:           validate-registries
-  Scored:         true
-  Source:         kyverno
-  Timestamp:
-    Nanos:    0
-    Seconds:  1705539793
-  Message:    validation rule 'validate-registries' passed.
-  Policy:     restrict-image-registries
-  Resources:
-    API Version:  v1
-    Kind:         Pod
-    Name:         nginx-ecr
-    Namespace:    default
-    UID:          e638aad7-7fff-4908-bbe8-581c371da6e3
-  Result:         pass
-  Rule:           validate-registries
-  Scored:         true
-  Source:         kyverno
-  Timestamp:
-    Nanos:    0
-    Seconds:  1705539793
+  Result:   fail
+  Rule:     validate-registries
+  Scored:   true
+  Source:   kyverno
+  ...
 Summary:
   Error:  0
   Fail:   1
-  Pass:   1
+  Pass:   3
   Skip:   0
   Warn:   0
 Events:   <none>
 ```
 
-The above output displays the `nginx` Pod policy validation receiving a `fail` Result and validation error Message. On the other hand, the `nginx-ecr` policy validation received a `pass` Result. Monitoring reports in this way could be an overhead for administrators. Kyverno also supports a GUI-based tool for [Policy reporter](https://kyverno.github.io/policy-reporter/core/targets/#policy-reporter-ui), which is outside the scope of this workshop.
+The report shows the `nginx` pod's `fail` result for `restrict-image-registries` with the validation error message. The `nginx-ecr` pod has its own separate report with all passes. Monitoring reports in this way could be an overhead for administrators. Kyverno also supports a GUI-based tool for [Policy reporter](https://kyverno.github.io/policy-reporter/core/targets/#policy-reporter-ui), which is outside the scope of this workshop.
 
 In this lab, you learned how to augment the Kubernetes PSA/PSS configurations with Kyverno. Pod Security Standards (PSS) and the in-tree Kubernetes implementation of these standards, Pod Security Admission (PSA), provide good building blocks for managing pod security. The majority of users switching from Kubernetes Pod Security Policies (PSP) should be successful using the PSA/PSS features.
 
